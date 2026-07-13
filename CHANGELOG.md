@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.0](https://github.com/dedsxc/mcp-openmemory/compare/openmemory-mcp-0.0.1...openmemory-mcp-0.1.0) (2026-07-13)
+
+
+### Features
+
+* **mcp:** derive memory bucket from trusted identity headers ([#7](https://github.com/dedsxc/mcp-openmemory/issues/7)) ([2b933bc](https://github.com/dedsxc/mcp-openmemory/commit/2b933bce279569496c4c3501c83c5e78b8cc2fd7))
+
 ## [0.0.1](https://github.com/dedsxc/mcp-openmemory/compare/openmemory-mcp-0.0.1...openmemory-mcp-0.0.1) (2026-07-13)
 
 
