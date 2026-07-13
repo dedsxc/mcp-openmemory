@@ -1,5 +1,6 @@
 # Use Python slim image for smaller size
-# Container image: ghcr.io/dedsxc/openmemory-mcp (built via release workflow)
+# Container image: ghcr.io/dedsxc/mcp-openmemory (built via release workflow)
+# App version: 0.0.2 (streamable-http transport)
 FROM python:3.12-alpine3.17@sha256:fc34b07ec97a4f288bc17083d288374a803dd59800399c76b977016c9fe5b8f2
 
 # Set working directory

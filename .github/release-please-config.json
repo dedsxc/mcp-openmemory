@@ -5,8 +5,8 @@
   "release-type": "simple",
   "packages": {
     ".": {
-      "package-name": "openmemory-mcp",
-      "release-as": "0.0.1",
+      "package-name": "mcp-openmemory",
+      "release-as": "0.0.2",
       "exclude-paths": [".github/"]
     }
   }
