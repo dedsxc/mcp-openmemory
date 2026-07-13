@@ -43,7 +43,29 @@ class Mem0Config(BaseSettings):
 
     default_user_id: str = Field(
         default="coder-agent",
-        description="Memory bucket used when the caller omits a user_id",
+        description="Memory bucket used when no identity header is present "
+        "(stdio / local agent mode, or when require_identity is False)",
+    )
+
+    identity_header: str = Field(
+        default="x-mem0-user-id",
+        description="HTTP header carrying the end-user identity. Trusted: it "
+        "must be injected by an authenticating layer (LibreChat, LiteLLM), "
+        "never by the calling LLM. Compared case-insensitively.",
+    )
+
+    tenant_header: str = Field(
+        default="x-mem0-tenant",
+        description="HTTP header carrying the calling app/tenant. Prefixed to "
+        "the user id to isolate apps sharing this server (e.g. librechat:alice). "
+        "Optional; injected by the trusted layer. Compared case-insensitively.",
+    )
+
+    require_identity: bool = Field(
+        default=True,
+        description="When true, HTTP requests without an identity header are "
+        "rejected (fail-closed). stdio requests always fall back to "
+        "default_user_id since they carry no HTTP headers.",
     )
 
     search_limit: int = Field(
