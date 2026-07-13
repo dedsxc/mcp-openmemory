@@ -38,7 +38,7 @@ jobs:
           token: ${{ steps.app-token.outputs.token }}
           config-file: .github/release-please-config.json
           manifest-file: .github/.release-please-manifest.json
-          
+
   release-docker-image:
     name: Release docker image
     runs-on: ubuntu-latest
@@ -47,7 +47,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        containers: ["openmemory-mcp"]
+        containers: ["mcp-openmemory"]
     steps:
       - name: Checkout repository
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
