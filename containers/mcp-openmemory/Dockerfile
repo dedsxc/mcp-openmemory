@@ -21,5 +21,5 @@ RUN pip install --no-cache-dir -e .
 # Expose HTTP/SSE port
 EXPOSE 8000
 
-# Run the server in SSE mode (production-ready)
-CMD ["openmemory-mcp-sse"]
+# Run the server in streamable-HTTP mode (production-ready)
+CMD ["openmemory-mcp-http"]

@@ -192,23 +192,20 @@ def serve_sse():
 
 def serve_http():
     """
-    Start the OpenMemory MCP server in HTTP streamable mode.
+    Start the OpenMemory MCP server in streamable-HTTP mode.
 
-    Server will be available at: http://{host}:{port}
+    This is the modern MCP transport (supersedes SSE). The server exposes a
+    single endpoint at http://{host}:{port}/mcp/ that clients connect to.
     """
-    import os
-
-    print("🚀 Starting OpenMemory MCP server in HTTP mode...")
+    print("🚀 Starting OpenMemory MCP server in streamable-HTTP mode...")
     print(
         f"📡 Server will be available at: "
-        f"http://{config.server_host}:{config.server_port}"
+        f"http://{config.server_host}:{config.server_port}/mcp/"
     )
     print(f"🔗 mem0 instance: {config.base_url}")
     print()
-    os.environ["MCP_HOST"] = config.server_host
-    os.environ["MCP_PORT"] = str(config.server_port)
     mcp.run(
-        transport="sse",
+        transport="http",
         host=config.server_host,
         port=config.server_port,
     )
