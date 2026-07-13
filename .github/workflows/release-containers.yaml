@@ -3,7 +3,10 @@ name: "Release docker image"
 on:
   push:
     branches: ["main"]
-    paths: ["containers/**"]
+    paths:
+      - "containers/**"
+      - ".github/.release-please-manifest.json"
+      - "CHANGELOG.md"
 
 permissions:
   contents: write
