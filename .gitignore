@@ -1,0 +1,7 @@
+charts/
+Chart.lock
+output.yaml
+.DS_Store
+.venv
+.env
+__pycache__/
