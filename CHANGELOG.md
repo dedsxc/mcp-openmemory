@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.0](https://github.com/dedsxc/mcp-openmemory/compare/openmemory-mcp-0.1.0...openmemory-mcp-0.2.0) (2026-07-16)
+
+
+### Features
+
+* **mcp:** optional agent_id sub-scope from trusted header ([#9](https://github.com/dedsxc/mcp-openmemory/issues/9)) ([01abd8e](https://github.com/dedsxc/mcp-openmemory/commit/01abd8eaa575cb45bc652ccc7cd1b9c265fe9b17))
+
 ## [0.1.0](https://github.com/dedsxc/mcp-openmemory/compare/openmemory-mcp-0.0.1...openmemory-mcp-0.1.0) (2026-07-13)
 
 
