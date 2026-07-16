@@ -54,11 +54,12 @@ class Mem0Config(BaseSettings):
         "never by the calling LLM. Compared case-insensitively.",
     )
 
-    tenant_header: str = Field(
-        default="x-mem0-tenant",
-        description="HTTP header carrying the calling app/tenant. Prefixed to "
-        "the user id to isolate apps sharing this server (e.g. librechat:alice). "
-        "Optional; injected by the trusted layer. Compared case-insensitively.",
+    agent_header: str = Field(
+        default="x-mem0-agent-id",
+        description="HTTP header carrying the agent identity (e.g. koda, "
+        "holmesgpt, librechat). Optional sub-scope within a user_id bucket, "
+        "injected by the trusted layer. When absent, memories are scoped by "
+        "user_id only (agent_id stays null). Compared case-insensitively.",
     )
 
     require_identity: bool = Field(

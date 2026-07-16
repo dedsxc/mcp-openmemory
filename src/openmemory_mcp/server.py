@@ -16,11 +16,17 @@ by an authenticating layer (LibreChat, LiteLLM). This prevents one app/user
 from reading another's memories by simply passing a different user_id.
 
 Resolution (see ``_resolve_user_id``):
-  * HTTP transport: ``<tenant>:<user>`` from the ``x-mem0-tenant`` /
-    ``x-mem0-user-id`` headers. Missing identity -> rejected (fail-closed)
-    when ``require_identity`` is true.
+  * HTTP transport: the ``user_id`` from the ``x-mem0-user-id`` header.
+    Missing identity -> rejected (fail-closed) when ``require_identity`` is
+    true.
   * stdio transport (local agent, no HTTP headers): falls back to
     ``default_user_id``.
+
+An optional ``agent_id`` sub-scope is derived the same way from the
+``x-mem0-agent-id`` header (see ``_resolve_agent_id``). It narrows a memory
+to a specific agent (e.g. koda, holmesgpt, librechat) within a user_id.
+When the header is absent, behaviour is unchanged: memories are scoped by
+user_id only and ``agent_id`` stays null.
 """
 
 from typing import Any
@@ -54,8 +60,9 @@ def _resolve_user_id() -> str:
     is intentionally NOT a tool argument, so the calling LLM cannot target an
     arbitrary user's memory.
 
-    * Over HTTP: ``<tenant>:<user>`` (tenant optional). If no identity header
-      is present and ``require_identity`` is true, the call is rejected.
+    * Over HTTP: the ``user_id`` from the ``x-mem0-user-id`` header. If no
+      identity header is present and ``require_identity`` is true, the call
+      is rejected.
     * Without an HTTP request (stdio / local agent): falls back to
       ``default_user_id``.
 
@@ -70,7 +77,6 @@ def _resolve_user_id() -> str:
         return config.default_user_id
 
     user = (http_headers.get(config.identity_header.lower()) or "").strip()
-    tenant = (http_headers.get(config.tenant_header.lower()) or "").strip()
 
     if not user:
         if config.require_identity:
@@ -82,7 +88,22 @@ def _resolve_user_id() -> str:
             )
         return config.default_user_id
 
-    return f"{tenant}:{user}" if tenant else user
+    return user
+
+
+def _resolve_agent_id() -> str | None:
+    """Derive the optional agent scope from a trusted request header.
+
+    Like the user bucket, the agent identity is taken from an HTTP header set
+    by the authenticating layer, never from a tool argument. It is optional:
+    when absent (no header, or stdio/local agent), memories are scoped by
+    user_id only and ``agent_id`` stays null.
+    """
+    http_headers = get_http_headers(include_all=True)
+    if not http_headers:
+        return None
+    agent = (http_headers.get(config.agent_header.lower()) or "").strip()
+    return agent or None
 
 
 @mcp.tool()
@@ -112,6 +133,9 @@ async def search_memory(
         "filters": {"user_id": _resolve_user_id()},
         "limit": limit or config.search_limit,
     }
+    agent_id = _resolve_agent_id()
+    if agent_id:
+        payload["filters"]["agent_id"] = agent_id
     async with httpx.AsyncClient(timeout=config.timeout) as client:
         response = await client.post(
             f"{config.base_url}/search", headers=_headers(), json=payload
@@ -148,6 +172,9 @@ async def add_memory(
         "messages": [{"role": role, "content": text}],
         "user_id": _resolve_user_id(),
     }
+    agent_id = _resolve_agent_id()
+    if agent_id:
+        payload["agent_id"] = agent_id
     async with httpx.AsyncClient(timeout=config.write_timeout) as client:
         response = await client.post(
             f"{config.base_url}/memories", headers=_headers(), json=payload
@@ -165,6 +192,9 @@ async def list_memories() -> list[dict[str, Any]]:
         A list of memory objects with their ids and remembered text.
     """
     params = {"user_id": _resolve_user_id()}
+    agent_id = _resolve_agent_id()
+    if agent_id:
+        params["agent_id"] = agent_id
     async with httpx.AsyncClient(timeout=config.timeout) as client:
         response = await client.get(
             f"{config.base_url}/memories", headers=_headers(), params=params
