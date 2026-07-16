@@ -16,9 +16,9 @@ by an authenticating layer (LibreChat, LiteLLM). This prevents one app/user
 from reading another's memories by simply passing a different user_id.
 
 Resolution (see ``_resolve_user_id``):
-  * HTTP transport: ``<tenant>:<user>`` from the ``x-mem0-tenant`` /
-    ``x-mem0-user-id`` headers. Missing identity -> rejected (fail-closed)
-    when ``require_identity`` is true.
+  * HTTP transport: the ``user_id`` from the ``x-mem0-user-id`` header.
+    Missing identity -> rejected (fail-closed) when ``require_identity`` is
+    true.
   * stdio transport (local agent, no HTTP headers): falls back to
     ``default_user_id``.
 
@@ -60,8 +60,9 @@ def _resolve_user_id() -> str:
     is intentionally NOT a tool argument, so the calling LLM cannot target an
     arbitrary user's memory.
 
-    * Over HTTP: ``<tenant>:<user>`` (tenant optional). If no identity header
-      is present and ``require_identity`` is true, the call is rejected.
+    * Over HTTP: the ``user_id`` from the ``x-mem0-user-id`` header. If no
+      identity header is present and ``require_identity`` is true, the call
+      is rejected.
     * Without an HTTP request (stdio / local agent): falls back to
       ``default_user_id``.
 
@@ -76,7 +77,6 @@ def _resolve_user_id() -> str:
         return config.default_user_id
 
     user = (http_headers.get(config.identity_header.lower()) or "").strip()
-    tenant = (http_headers.get(config.tenant_header.lower()) or "").strip()
 
     if not user:
         if config.require_identity:
@@ -88,7 +88,7 @@ def _resolve_user_id() -> str:
             )
         return config.default_user_id
 
-    return f"{tenant}:{user}" if tenant else user
+    return user
 
 
 def _resolve_agent_id() -> str | None:
