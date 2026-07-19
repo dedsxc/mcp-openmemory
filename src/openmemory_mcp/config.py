@@ -4,8 +4,10 @@ Configuration management for the OpenMemory MCP server.
 Handles environment variables and settings validation.
 """
 
-from pydantic import Field, HttpUrl
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from typing import Annotated
+
+from pydantic import Field, HttpUrl, field_validator
+from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
 
 
 class Mem0Config(BaseSettings):
@@ -53,6 +55,37 @@ class Mem0Config(BaseSettings):
         "must be injected by an authenticating layer (LibreChat, LiteLLM), "
         "never by the calling LLM. Compared case-insensitively.",
     )
+
+    identity_headers: Annotated[list[str], NoDecode] = Field(
+        default_factory=list,
+        description="Additional HTTP headers carrying the end-user identity, "
+        "tried in order after ``identity_header``. Lets a single shared mem0 "
+        "backend accept identities forwarded under different names by "
+        "different authenticating layers (e.g. ``x-mem0-user-id`` for "
+        "LibreChat/LiteLLM, ``x-coder-owner-id`` for Coder). The first header "
+        "present with a non-empty value wins. Set via ``MEM0_IDENTITY_HEADERS`` "
+        "as a comma-separated string (e.g. ``x-coder-owner-id``). All trusted: "
+        "they must "
+        "be injected by an authenticating layer, never by the calling LLM. "
+        "Compared case-insensitively.",
+    )
+
+    @property
+    def identity_header_candidates(self) -> list[str]:
+        """Return the ordered, de-duplicated list of identity header names.
+
+        ``identity_header`` (the primary/back-compatible name) is always tried
+        first, followed by any extras in ``identity_headers``. Names are
+        lower-cased for case-insensitive header lookup.
+        """
+        seen: set[str] = set()
+        ordered: list[str] = []
+        for name in [self.identity_header, *self.identity_headers]:
+            key = (name or "").strip().lower()
+            if key and key not in seen:
+                seen.add(key)
+                ordered.append(key)
+        return ordered
 
     agent_header: str = Field(
         default="x-mem0-agent-id",
@@ -106,3 +139,16 @@ class Mem0Config(BaseSettings):
     def base_url(self) -> str:
         """Return the mem0 base URL as a string without a trailing slash."""
         return str(self.mem0_url).rstrip("/")
+
+    @field_validator("identity_headers", mode="before")
+    @classmethod
+    def _split_identity_headers(cls, value: object) -> object:
+        """Allow ``MEM0_IDENTITY_HEADERS`` as a comma-separated string.
+
+        pydantic-settings otherwise expects a JSON list for ``list`` fields.
+        A plain comma-separated value (``a,b,c``) is the friendlier form for
+        an env var, so accept both. Empty entries are dropped.
+        """
+        if isinstance(value, str):
+            return [part.strip() for part in value.split(",") if part.strip()]
+        return value

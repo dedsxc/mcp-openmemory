@@ -30,6 +30,8 @@ Environment variables (prefix `MEM0_`):
 | `MEM0_MEM0_URL` | `http://mem0:8000` | Base URL of the mem0 REST server |
 | `MEM0_API_KEY` | _(none)_ | Admin API key, sent as `X-API-Key` |
 | `MEM0_DEFAULT_USER_ID` | `coder-agent` | Bucket used when no `user_id` is passed |
+| `MEM0_IDENTITY_HEADER` | `x-mem0-user-id` | Primary trusted header carrying the end-user identity |
+| `MEM0_IDENTITY_HEADERS` | _(none)_ | Extra identity headers, tried after `MEM0_IDENTITY_HEADER` (comma-separated, e.g. `x-coder-owner-id`). First non-empty wins. |
 | `MEM0_SEARCH_LIMIT` | `5` | Default number of memories per search |
 | `MEM0_TIMEOUT` | `10` | HTTP timeout (s) for reads (search/list) |
 | `MEM0_WRITE_TIMEOUT` | `60` | HTTP timeout (s) for writes (add runs a server-side LLM extraction) |

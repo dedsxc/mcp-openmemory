@@ -60,9 +60,9 @@ def _resolve_user_id() -> str:
     is intentionally NOT a tool argument, so the calling LLM cannot target an
     arbitrary user's memory.
 
-    * Over HTTP: the ``user_id`` from the ``x-mem0-user-id`` header. If no
-      identity header is present and ``require_identity`` is true, the call
-      is rejected.
+    * Over HTTP: the ``user_id`` from the first present identity header
+      (``identity_header`` then any ``identity_headers``). If none is present
+      and ``require_identity`` is true, the call is rejected.
     * Without an HTTP request (stdio / local agent): falls back to
       ``default_user_id``.
 
@@ -76,13 +76,20 @@ def _resolve_user_id() -> str:
     if not http_headers:
         return config.default_user_id
 
-    user = (http_headers.get(config.identity_header.lower()) or "").strip()
+    user = ""
+    for header in config.identity_header_candidates:
+        user = (http_headers.get(header) or "").strip()
+        if user:
+            break
 
     if not user:
         if config.require_identity:
+            expected = ", ".join(
+                f"'{name}'" for name in config.identity_header_candidates
+            )
             raise ToolError(
-                "Missing identity: this memory server requires the "
-                f"'{config.identity_header}' header, injected by the "
+                "Missing identity: this memory server requires one of the "
+                f"following headers ({expected}), injected by the "
                 "authenticating layer. Refusing to access memory without a "
                 "verified user."
             )
