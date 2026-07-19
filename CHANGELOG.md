@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0](https://github.com/dedsxc/mcp-openmemory/compare/openmemory-mcp-0.2.0...openmemory-mcp-0.3.0) (2026-07-19)
+
+
+### Features
+
+* **mcp:** accept multiple trusted identity headers ([#11](https://github.com/dedsxc/mcp-openmemory/issues/11)) ([3e32d1d](https://github.com/dedsxc/mcp-openmemory/commit/3e32d1dfac905a7def64979500881af53371d915))
+
 ## [0.2.0](https://github.com/dedsxc/mcp-openmemory/compare/openmemory-mcp-0.1.0...openmemory-mcp-0.2.0) (2026-07-16)
 
 
